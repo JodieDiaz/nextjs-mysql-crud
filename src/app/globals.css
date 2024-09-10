@@ -2,32 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    @apply bg-gray-600 text-wheat; /* Fondo gris más claro y texto color trigo */
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+form {
+    @apply bg-gray-700 p-4 rounded-lg; /* Fondo gris oscuro, padding y bordes redondeados a los formularios */
+    max-width: 400px; /* Limita el ancho máximo del formulario */
+    width: 100%; /* Hace que el formulario sea responsivo */
+}
+
+input, textarea, select {
+    @apply bg-gray-700 text-wheat border-gray-600 rounded-md p-2; /* Estiliza los inputs, textarea y select con fondo gris oscuro, texto color trigo, y bordes */
+    width: 100%; /* Asegura que todos los inputs ocupen el 100% del ancho disponible */
+}
+
+button {
+    @apply bg-gray-800 hover:bg-gray-700 text-wheat font-bold py-2 px-4 rounded-md; /* Fondo gris oscuro y hover ligeramente más claro */
+}
+ /* Estilos globales para las tarjetas de producto */
+.product-card {
+    @apply bg-white rounded-lg border-gray-200 p-4 shadow-md hover:bg-wheat hover:cursor-pointer;
+}
+
+.product-name {
+    @apply text-lg font-bold mb-2 text-blue-900; /* Ajusta el color como desees */
+}
+
+.product-price {
+    @apply text-xl text-orange-500 mb-2; /* Ajusta el color como desees */
+}
+
+.product-description {
+    @apply text-gray-600; /* Ajusta el color como desees */
 }
