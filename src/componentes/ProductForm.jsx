@@ -1,7 +1,7 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef,useEffect } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation"; //para poder cambiar de pagina y redirigira principal despues de crear el producto.
+import { useRouter, useParams } from "next/navigation"; //para poder cambiar de pagina y redirigira principal despues de crear el producto.
 
 function ProductForm() {
   const [product, setProduct] = useState({
@@ -11,7 +11,9 @@ function ProductForm() {
   });
 
   const form = useRef(null);
-  const router = useRouter(); 
+  const router = useRouter();
+  const params = useParams();
+  console.log(params)
 
   const handleChange = (e) => {
     setProduct({
@@ -20,24 +22,71 @@ function ProductForm() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await axios.post("/api/products", product);
-      console.log(res);
-
-      // Reiniciar el estado del producto
-      setProduct({
-        name: "",
-        price: "",
-        description: "",
-      });
-    } catch (error) {
-      console.error("Error submitting form:", error);
+  //cargar datos al formulario de edit/id
+  useEffect(() => {
+    if (params.id) {
+      axios
+        .get(`/api/products/${params.id}`)
+        .then((res) => {
+          if (res.data && Array.isArray(res.data)) {
+            // Si la respuesta es un array, accedemos al primer elemento [0]
+            const productData = res.data[0]; // Esto toma el primer objeto del array
+            setProduct({
+              name: productData.name || "",
+              price: productData.price || "",
+              description: productData.description || "",
+            });
+          } else {
+            // Si no es un array, asignamos el objeto directamente
+            setProduct({
+              name: res.data.name || "",
+              price: res.data.price || "",
+              description: res.data.description || "",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching product data:", error);
+        });
     }
-    router.push('/products')// redirige a la pagina de producto al terminar el formulario 
-  };
+  }, [params.id]);
+
+
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+
+   try {
+     let res;
+     const config = {
+       headers: {
+         "Content-Type": "application/json",
+       },
+     };
+
+     if (!params.id) {
+       // Si no hay params.id, se crea un nuevo producto (POST)
+       res = await axios.post("/api/products", product, config);
+     } else {
+       // Si hay params.id, se actualiza el producto existente (PUT)
+       res = await axios.put(`/api/products/${params.id}`, product, config);
+     }
+
+     console.log(res);
+
+     // Reiniciar el estado del producto
+     setProduct({
+       name: "",
+       price: "",
+       description: "",
+     });
+
+     // Redirigir a la página de productos
+     router.push("/products");
+     router.refresh();
+   } catch (error) {
+     console.error("Error submitting form:", error);
+   }
+ };
 
   return (
     <div className="flex justify-center items-center min-h-screen">
@@ -97,7 +146,7 @@ function ProductForm() {
         />
 
         <button className="text-wheat font-bold py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-700 text-white">
-          Save Product
+          {params.id ? "Update Product": "Create Product"}
         </button>
       </form>
     </div>
