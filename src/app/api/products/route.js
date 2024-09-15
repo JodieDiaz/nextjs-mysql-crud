@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { conn } from "@/libs/db";
-
+import { unlink} from 'fs/promises';
+import cloudinary from "@/libs/cloudinary";
+import { processImage } from "@/libs/processImage";
 
 export async function GET() {
     try {
@@ -10,7 +12,8 @@ export async function GET() {
         
 
         }catch (error){
-         return NextResponse.json({
+         return NextResponse.json(
+          {
             message: error.message,
          },
          {
@@ -24,20 +27,43 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { name, description, price } = await request.json();
+    const data = await request.formData();
+    const name = data.get("name");
+    const description = data.get("description");
+    const price = data.get("price");
+    const image = data.get("image");
 
     // Verifica si los campos necesarios están presentes
-    if (!name || !description || !price) {
-      throw new Error(
-        "Todos los campos (name, description, price) son requeridos."
+    if (!name || !description || !price || !image) {
+      return NextResponse.json(
+        {
+          message:
+            "Todos los campos (name, description, price, image) son requeridos.",
+        },
+        { status: 400 }
       );
     }
+    
+   const filePath = await processImage(image);
+   
+   const res = await cloudinary.uploader.upload(filePath);
+   console.log(res);
+
+   //eliminar la imagen de public apenas suba a cloudinary
+   if (res) {
+     try {
+       await unlink(filePath);
+     } catch (unlinkError) {
+       console.warn("No se pudo eliminar el archivo local:", unlinkError);
+     }
+   }
 
     // Realiza la inserción de datos en la base de datos
     const [result] = await conn.query("INSERT INTO productjodie SET ?", {
-      name,
-      description,
-      price,
+      name: data.get("name"),
+      description: data.get("description"),
+      price: data.get("price"),
+      image: res.secure_url,
     });
 
     // Retorna la respuesta con el id insertado y los demás datos

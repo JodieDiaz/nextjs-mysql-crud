@@ -28,8 +28,8 @@ async function ProductsPage() {
   // Llama a la función loadProducts para obtener los productos
   const products = await loadProducts();
 
-  // Imprime los productos en la consola para depuración
-  console.log(products);
+
+  
 
   // Retorna el JSX para renderizar la página
  return (

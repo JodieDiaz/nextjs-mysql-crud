@@ -14,16 +14,23 @@ async function ProductPage({params}){
     const product = await LoadProduct(params.id);
     console.log(product)
 
-    return (
-      <section className="flex justify-center items-center">
-        <div className="text-black bg-white py-6 px-9 ">
-          <p>Name: {product.name}</p>
-          <p>Price: {product.price}</p>
-          <p>Description: {product.description}</p>
-          <Buttons productId = {product.id}/>
-        </div>
-      </section>
-    );
+    
+     return (
+       <section className="flex justify-center items-center h-screen]">
+         <div className="bg-white text-black py-6 px-9 max-w-md w-full">
+           {/* Ajusta el tamaño de la imagen */}
+           <img
+             src={product.image}
+             className="w-full h-67 object-contain py-2"
+             alt={product.name}
+           />
+           <h3 className="text-2xl font-bold mb-3">{product.name}</h3>
+           <h4 className="text-3xl font-bold">{product.price}</h4>
+           <p className="text-slate-700">{product.description}</p>
+           <Buttons productId={product.id} />
+         </div>
+       </section>
+     );
     
 }
 

@@ -10,6 +10,7 @@ function ProductForm() {
     description: "",
   });
 
+  const [file, setFile] = useState(null);
   const form = useRef(null);
   const router = useRouter();
   const params = useParams();
@@ -55,6 +56,15 @@ function ProductForm() {
  const handleSubmit = async (e) => {
    e.preventDefault();
 
+    const formData = new FormData();
+    formData.append("name", product.name);
+    formData.append("price", product.price);
+    formData.append("description", product.description);
+
+    if (file) {
+      formData.append("image", file);
+    }
+
    try {
      let res;
      const config = {
@@ -64,11 +74,23 @@ function ProductForm() {
      };
 
      if (!params.id) {
+
+     
+    
        // Si no hay params.id, se crea un nuevo producto (POST)
-       res = await axios.post("/api/products", product, config);
+       res = await axios.post("/api/products", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+       }, config);
      } else {
+      
        // Si hay params.id, se actualiza el producto existente (PUT)
-       res = await axios.put(`/api/products/${params.id}`, product, config);
+       res = await axios.put(`/api/products/${params.id}`, formData,{
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
+       });
      }
 
      console.log(res);
@@ -91,7 +113,7 @@ function ProductForm() {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <form
-        className="bg-gray-900 shadow-md rounded-md px-8 py-6 mb-4 grid grid-cols-1 gap-y-6 max-w-sm w-full"
+        className="bg-gray-900 shadow-md rounded-md px-8 py-6 mb-4 grid grid-cols-1 gap-y-6 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"
         onSubmit={handleSubmit}
         ref={form}
         style={{ minWidth: "300px" }}
@@ -142,11 +164,35 @@ function ProductForm() {
           placeholder="description"
           onChange={handleChange}
           value={product.description}
-          className="shadow appearance-none border rounded w-full py-2 px-3"
+          className="shadow appearance-none border rounded w-full py-2 px-3 mb-2"
         />
 
-        <button className="text-wheat font-bold py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-700 text-white">
-          {params.id ? "Update Product": "Create Product"}
+        {/* Product Image */}
+        <label
+          htmlFor="Product Image"
+          className="block text-gray-700 text-sm font-bold mb-2"
+        >
+          Product Image:
+        </label>
+        <input
+          type="file"
+          className="shadow appearance-none border rounded w-full py-2 px-3 mb-2"
+          onChange={(e) => {
+            setFile(e.target.files[0]);
+          }}
+        />
+
+        {file && (
+          <div className="relative w-24 h-24 overflow-hidden my-4">
+            <img
+              className="absolute top-0 left-0 w-full h-full object-contain"
+              src={URL.createObjectURL(file)}
+              alt="Product Preview"
+            />
+          </div>
+        )}
+        <button className="text-wheat font-bold py-2 px-4 rounded-md bg-blue-500 hover:bg-blue-700 text-white mb-2">
+          {params.id ? "Update Product" : "Create Product"}
         </button>
       </form>
     </div>
